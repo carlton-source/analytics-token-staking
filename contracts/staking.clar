@@ -1,4 +1,5 @@
 ;; Title: Analytics Token Staking and Governance Contract
+
 ;; Description: A Clarity smart contract for staking STX tokens, earning analytics tokens,
 ;; and participating in protocol governance through a tiered system with voting capabilities.
 
@@ -220,7 +221,6 @@
     )
 )
 
-
 ;; Governance Operations
 (define-public (create-proposal (description (string-utf8 256)) (voting-period uint))
     (let
@@ -327,5 +327,40 @@
             u125                   ;; 1.25x multiplier
             u100                   ;; 1x multiplier (no lock)
         )
+    )
+)
+
+(define-private (calculate-rewards (user principal) (blocks uint))
+    (let
+        (
+            (staking-position (unwrap! (map-get? StakingPositions user) u0))
+            (user-position (unwrap! (map-get? UserPositions user) u0))
+            (stake-amount (get amount staking-position))
+            (base-rate (var-get base-reward-rate))
+            (multiplier (get rewards-multiplier user-position))
+        )
+        (/ (* (* (* stake-amount base-rate) multiplier) blocks) u14400000)
+    )
+)
+
+(define-private (is-valid-description (desc (string-utf8 256)))
+    (and 
+        (>= (len desc) u10)
+        (<= (len desc) u256)
+    )
+)
+
+(define-private (is-valid-lock-period (lock-period uint))
+    (or 
+        (is-eq lock-period u0)
+        (is-eq lock-period u4320)
+        (is-eq lock-period u8640)
+    )
+)
+
+(define-private (is-valid-voting-period (period uint))
+    (and 
+        (>= period u100)
+        (<= period u2880)
     )
 )
