@@ -289,3 +289,19 @@
         (ok true)
     )
 )
+
+;; ======================
+;; Read-Only Functions
+;; ======================
+
+(define-read-only (get-contract-owner)
+    (ok CONTRACT-OWNER)
+)
+
+(define-read-only (get-stx-pool)
+    (ok (var-get stx-pool))
+)
+
+(define-read-only (get-proposal-count)
+    (ok (var-get proposal-count))
+)
